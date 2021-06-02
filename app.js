@@ -1,14 +1,15 @@
 // Require the Bolt package (github.com/slackapi/bolt)
 const { App } = require("@slack/bolt");
-const fetch = require("node-fetch"); 
+const fetch = require("node-fetch");
 var giphy_url;
+var gif_title;
 
-/*    var giphy = fetch("https://api.giphy.com/v1/gifs/random?api_key=TkGj3T09bCiXLMcXZecHYvWeLf3qTRvq&tag=limit=1&rating=r")
+
+var giphy = fetch("https://api.giphy.com/v1/gifs/random?api_key=TkGj3T09bCiXLMcXZecHYvWeLf3qTRvq&tag=limit=1&rating=r")
                     .then(response => response.json())
                     .then(data => {console.log(data.data.images.fixed_height_downsampled.url);
                                    giphy_url = data.data.images.fixed_height_downsampled.url;
                                   });
-*/
 
 const reps = ["reply 1", "reply 2", "reply 3"];
 
@@ -46,34 +47,33 @@ app.message(":wave:", async ({ message, say }) => {
   await say(`Hello, <@${message.user}>`);
 });
 
-app.event("app_mention", async ({ event, payload, say }) => {  
+app.event("app_mention", async ({ event, payload, say }) => {
   try {
     let rando = Math.floor(Math.random() * 6);
     let answer = "";
-    
-    var giphy = fetch("https://api.giphy.com/v1/gifs/random?api_key=TkGj3T09bCiXLMcXZecHYvWeLf3qTRvq&tag=limit=1&rating=r")
-                    .then(response => response.json())
-                    .then(data => {console.log(data.data.images.fixed_height_downsampled.url);
-                                   giphy_url = data.data.images.fixed_height_downsampled.url;
-                                  });
-    //let answer = "I got not answer";
 
-    //say(CONFUSED_RESPONSES[rando]);
+    var giphy = fetch(
+      "https://api.giphy.com/v1/gifs/random?api_key=TkGj3T09bCiXLMcXZecHYvWeLf3qTRvq&tag=limit=1&rating=r"
+    )
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.data.images.fixed_height_downsampled.url);
+        giphy_url = data.data.images.fixed_height_downsampled.url;
+        gif_title = giphy_url;
+      });
 
     say(event.text.substring(15).toLowerCase());
     answer = questions_list[event.text.substring(15).toLowerCase()]; //Trimming username from @mention
-    
+
     if (answer) {
       say(answer);
     } else {
-      say("Sorry, I got nothin");
+      say(CONFUSED_RESPONSES[rando]);
     }
-    //say(event.user);
-    //say(event.channel);
   } catch (error) {
     console.error(error);
   }
-    
+
   try {
     const result = await app.client.chat.postMessage({
       token: process.env.SLACK_BOT_TOKEN,
@@ -81,41 +81,30 @@ app.event("app_mention", async ({ event, payload, say }) => {
       channel: event.channel,
       // Include a button in the message (or whatever blocks you want!)
       blocks: [
-        		{
-	        	"type": "image",  
-			      "title": {
-				      "type": "plain_text",
-				      "text": "Test",
-				      "emoji": true
-			      },
-			      "image_url": giphy_url,
-		      	"alt_text": "Test"
-	         },
-          ], text: "This is your cat"
+        {
+          type: "image",
+          title: {
+            type: "plain_text",
+            text: "Just Text",
+            emoji: true
+          },
+          image_url: giphy_url,
+          alt_text: "Nothing"
+        }
+      ],
+      text: gif_title
     });
     console.log(result);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
   }
 });
 
-/* function (deps) {
-    return [
-        (session, course) => {
-            const user_input = session.getMessage().data;
-            if (!(user_input && user_input.length)) {
-                return course.next();
-            }
-
-            const answer = questions_list[user_input.toLowerCase()];
-            if (answer) {
-                session.storage.set("answer", answer);
-                return course.replace("faq");
-            }
-
-
-            return course.next();
-        }
-    ];
-} */
+app.message(/^.*([f|F]rank).*/, async ({ context, say }) => {
+  // RegExp matches are inside of context.matches
+  try {
+    await say("Frank Markley?! Who the fuck is that guy???");
+  } catch (error) {
+    console.error(error);
+  }
+});
