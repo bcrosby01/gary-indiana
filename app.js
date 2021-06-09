@@ -42,6 +42,15 @@ app.event("member_joined_channel", async ({ event, payload, say }) => {
   }
 });
 
+app.event("member_left_channel", async ({ event, payload, say }) => {
+  try {
+    say('<@' + event.user + '> left <#' + event.channel + '>! How rude!! :cry:')
+    console.log("user left "  + '<' + event.user + '> from ' + '<#' + event.channel + '>')
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 //If someone mentions Frank, send a message :)
 app.message(/^.*([f|F]rank).*/, async ({ context, say }) => {
   try {
