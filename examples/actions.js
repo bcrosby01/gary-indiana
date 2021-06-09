@@ -85,3 +85,8 @@ app.action('button_abc', async ({ ack, body, context }) => {
   console.log('⚡️ Bolt app is running!');
 })();
 
+Can be used to listen to all messages 
+app.message(async ({ message, say }) => {
+  const reversedText = [...message.text].reverse().join("");
+  await say(reversedText);
+});
