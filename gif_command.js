@@ -1,43 +1,44 @@
 const fetch = require("node-fetch");
 const { App } = require("@slack/bolt");
+
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-exports.random_gif = function (event) {
-  var giphy_url;
+var giphy_url;
+var giphy_title;
 
-  var giphy = fetch(
-      "https://api.giphy.com/v1/gifs/random?api_key=TkGj3T09bCiXLMcXZecHYvWeLf3qTRvq&tag=limit=1&rating=r"
-    )
-      .then(response => response.json())
-      .then(data => {
-        console.log(data.data.images.fixed_height_downsampled.url);
-        giphy_url = data.data.images.fixed_height_downsampled.url;
-      });
+exports.random_gif = async function (payload) {
+  let response = await fetch("https://api.giphy.com/v1/gifs/random?api_key=" + process.env.GIPHY_API_TOKEN + "&tag=limit=1&rating=r");
   
   try {
+    if (response.status === 200) {
+      let data = await response.json();
+      //console.log(data.data.images.fixed_height_downsampled.url);
+      giphy_url = data.data.images.fixed_height_downsampled.url;
+      giphy_title = data.data.title;
+      
       const result = app.client.chat.postMessage({
         token: process.env.SLACK_BOT_TOKEN,
         // Channel to send message to
-        channel: event.channel,
+        channel: payload.channel_id,
         blocks: [
           {
             type: "image",
             title: {
               type: "plain_text",
-              text: "Just Text",
+              text: giphy_title,
               emoji: true
           },
             image_url: giphy_url,
-            alt_text: "Nothing"
+            alt_text: giphy_title
           }
         ],
         text: "test"
       });
-         return(result);
-    } catch (error) {
-     return(error);
-  }
+    }
+  } catch (error) {
+     console.log(error);
+  } 
 };

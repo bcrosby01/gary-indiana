@@ -1,22 +1,26 @@
-// Require the Bolt package (github.com/slackapi/bolt)
+//------MODULES--------//
 const { App } = require("@slack/bolt");
 const egg = require("./easter_eggs.js");
 const ques = require("./questions_db.js");
 const count = require("./countdown.js");
+const beer_name = require("./beername.js");
+const gif = require("./gif_command.js");
 
+//Main APP Object
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-//Start up the Bot
+//Start up Rita!!
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
 
-  console.log("👁‍🗨👅👁‍🗨 Gary is Alive!");
+  console.log("👁‍🗨👅👁‍🗨 Rita is Alive!");
 })();
 
+//-------EVENT LISTENERS--------//
 //If someone directly asks Gary a question
 app.event("app_mention", async ({ event, payload, say }) => {
   try {
@@ -51,6 +55,7 @@ app.event("member_left_channel", async ({ event, payload, say }) => {
   }
 });
 
+//-------MESSAGE LISTENERS--------//
 //If someone mentions Frank, send a message :)
 app.message(/^.*([f|F]rank).*/, async ({ context, say }) => {
   try {
@@ -61,8 +66,32 @@ app.message(/^.*([f|F]rank).*/, async ({ context, say }) => {
   }
 }); 
 
+//-------COMMANDS--------//
+//Countdown ---NOT YET USED
 app.command("/countdown", async ({ command, ack, say }) => {
   await ack();
   let days_left_msg = count.count_to_asheville() + " days to Asheville!"
   await say(days_left_msg);
+});
+
+//AI Beer Name.Style
+app.command("/beername", async ({ command, ack, say }) => {
+  await ack();
+
+  try {
+    say(await beer_name.random_name_api());
+  } catch(error) {
+    console.log(error)
+  }
+});
+
+//Random GIF 
+app.command("/randomgif", async ({payload, command, ack, say }) => {
+  await ack();
+
+  try {
+    await gif.random_gif(payload);
+  } catch(error) {
+    console.log(error)
+  }
 });
